@@ -80,6 +80,7 @@ function knightMovesNoRec(starting, ending) {
   let myTree = new Tree(queue[0]);
 
   let current = queue[0];
+  let checked;
   while (queue.length > 0) {
     current = queue[0];
     if (current.x == ending[0] && current.y == ending[1]) break;
@@ -109,20 +110,62 @@ function knightMovesNoRec(starting, ending) {
     outputArr.unshift([prev.x, prev.y]);
     prev = prev.previous;
   }
+  console.log(queue.length);
+  return { outputArr: outputArr, count: count };
+}
+//   optimization test
+function optimizedKnightMovesNoRec(starting, ending) {
+  let queue = [new Square(...starting)];
+  let myTree = new Tree(queue[0]);
 
+  let current = queue[0];
+  let checkedArr = [];
+  while (queue.length > 0) {
+    current = queue[0];
+    if (current.x == ending[0] && current.y == ending[1]) break;
+    else {
+      current.createMoves();
+      //    add possible moves to the queue
+      current.moves.forEach((move) => {
+        if (
+          (myTree.root == current ||
+            move.x != current.previous.x ||
+            move.y != current.previous.y) &&
+          !(
+            queue.some((elm) => elm.x == move.x && elm.y == move.y) ||
+            checkedArr.some((elm) => elm.x == move.x && elm.y == move.y)
+          )
+        ) {
+          queue.push(move);
+        }
+      });
+      //   remove current from queue
+      checkedArr.push(queue.shift());
+    }
+  }
+
+  let outputArr = [[current.x, current.y]];
+  let count = 0;
+  let prev = current.previous;
+  while (prev != null) {
+    count++;
+    outputArr.unshift([prev.x, prev.y]);
+    prev = prev.previous;
+  }
+  console.log(queue.length);
   return { outputArr: outputArr, count: count };
 }
 
-// const start = Date.now();
+const start = Date.now();
 
 let moves = knightMoves([0, 0], [7, 7]);
 console.log("done in", moves.count, " moves");
 moves.outputArr.forEach((elm) => {
   console.log(elm);
 });
-// const end = Date.now();
-// console.log(`recursion Execution time: ${end - start} ms`);
-// const start2 = Date.now();
+const end = Date.now();
+console.log(`recursion Execution time: ${end - start} ms`);
+const start2 = Date.now();
 
 let moves2 = knightMovesNoRec([0, 0], [7, 7]);
 console.log("done in", moves2.count, " moves");
@@ -130,5 +173,15 @@ moves2.outputArr.forEach((elm) => {
   console.log(elm);
 });
 
-// const end2 = Date.now();
-// console.log(`loop Execution time: ${end2 - start2} ms`);
+const end2 = Date.now();
+console.log(`loop Execution time: ${end2 - start2} ms`);
+const start3 = Date.now();
+
+let moves3 = optimizedKnightMovesNoRec([0, 0], [7, 7]);
+console.log("done in", moves3.count, " moves");
+moves3.outputArr.forEach((elm) => {
+  console.log(elm);
+});
+
+const end3 = Date.now();
+console.log(`optimized loop Execution time: ${end3 - start3} ms`);
